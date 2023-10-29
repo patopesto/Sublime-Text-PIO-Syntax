@@ -1,0 +1,307 @@
+%YAML 1.2
+---
+# Sublime syntax files documentation: http://www.sublimetext.com/docs/syntax.html
+# PIO syntax based on the RPI Pico datasheet (latest): https://datasheets.raspberrypi.com/rp2040/rp2040-datasheet.pdf
+#   datasheet version used: 2.2 (released 14 Jun 2023)
+
+file_extensions:
+  - pio
+version: 2
+scope: source.pio
+
+variables:
+  identifier: \b[[:alpha:]_][[:alnum:]_]*\b # upper and lowercase
+  public: \bPUBLIC|public\b # only upper case (to be checked)
+
+  # number digits
+  bin_digit: '[01]'
+  oct_digit: '[0-7]'
+  dec_digit: '\d'
+  hex_digit: '\h'
+
+  dec_digits: '{{dec_digit}}+'
+
+  # number exponents
+  dec_exponent: '(?:[eE][-+]?{{dec_digit}}*)'
+  hex_exponent: '(?:[pP][-+]?{{dec_digit}}*)'
+
+  # number suffixes
+  bin_suffix: '[2-9a-zA-Z_][[:alnum:]_]*'
+  oct_suffix: '[8-9g-zG-Z_][[:alnum:]_]*'
+  dec_suffix: '[a-zA-Z_][[:alnum:]_]*'
+  hex_suffix: '[g-zG-Z_][[:alnum:]_]*'
+  double_suffix: '[fFlL]'
+  float_suffix: '[fF]'
+  integer_suffix: '[lL]{1,2}[uU]?|[uU][lL]{0,2}'
+
+  instructions: '(jmp|wait|in|out|push|pull|mov|irq|set|nop)'
+  conditions: '(!x|x--|!y|y--|x!=y|pin(?!s)|!osre)'
+  registers: '(x|y)'
+  keywords: '(pins|pin|gpio|irq|isr|osr|null|pindirs|pc|exec|iffull|block|noblock|ifempty|status|set|nowait|wait|clear)'
+  # all the keywords in instructions found in section 3.4 of the datasheet where added here for syntax highlighting,
+  # this could eventually be refactored to decoded each instruction properly, we are currently only making a best attempt
+
+contexts:
+  main:
+    - include: comments
+    - include: labels
+
+    - match: '^%'
+      scope: punctuation.embedded.block.begin.pio
+      push: embedded-language
+
+    - match: '^\.'
+      scope: punctuation.definition.directive.pio
+      push: directives
+
+    - match: '(?=((?i){{instructions}}(?-i)))'  # '(?i)' enable case-insensitive mode, '(?-i)' enable case-sensitive mode
+      push: instructions-common
+
+
+  # Taken from Packages/C++/C.sublime-syntax
+  numbers:
+    # hexadecimal integer
+    - match: \b(0[xX])({{hex_digit}}*)(?:({{integer_suffix}})|({{hex_suffix}}))?
+      scope: meta.number.integer.hexadecimal.pio
+      captures:
+        1: constant.numeric.base.pio
+        2: constant.numeric.value.pio
+        3: constant.numeric.suffix.pio
+        4: invalid.illegal.numeric.suffix.pio
+
+    # binary integer
+    - match: \b(0[bB])({{bin_digit}}*)(?:({{integer_suffix}})|({{bin_suffix}}))?
+      scope: meta.number.integer.binary.pio
+      captures:
+        1: constant.numeric.base.pio
+        2: constant.numeric.value.pio
+        3: constant.numeric.suffix.pio
+        4: invalid.illegal.numeric.suffix.pio
+
+    # decimal integer
+    - match: \b({{dec_digits}})(?:({{integer_suffix}})|({{dec_suffix}}))?
+      scope: meta.number.integer.decimal.pio
+      captures:
+        1: constant.numeric.value.pio
+        2: constant.numeric.suffix.pio
+        3: invalid.illegal.numeric.suffix.pio
+
+
+  # From RP2040 datasheet Section 3.3.2
+  values:
+    - include: numbers
+    - match: '{{identifier}}'
+    - include: operators
+
+  # From RP2040 datasheet Section 3.3.3
+  operators:
+    - match: '\b(\+|\-|\*|/|::)\b'
+      scope: keyword.operator.arithmetic.pio
+
+
+  # From RP2040 datasheet Section 3.3.6
+  instructions-common:
+    - meta_scope: meta.instruction.pio
+    - include: instructions
+    - include: instruction-line-continuation
+    - match: '\bside\b'
+      scope: instruction.side.keyword.pio
+      push:
+        - include: line-continuation
+        - meta_content_scope: instruction.side.value.pio
+        - include: values
+        - include: comments
+        - include: line-ending
+        - match: '(?=\[)' # hack to pop out of 'side' context and go into 'delay' context
+          pop: true
+    - match: '(\[)'
+      scope: punctuation.instruction.delay.begin.pio
+      push:
+        - meta_content_scope: instruction.delay.value.pio
+        - include: line-continuation
+        - include: values
+        - match: '\]'
+          scope: punctuation.instruction.delay.end.pio
+          pop: true
+
+    - include: comments
+    - include: line-ending
+
+  # From RP2040 datasheet Section 3.4
+  instructions:
+    - match: '(?i){{instructions}}(?-i)\b' # '(?i)' enable case-insensitive mode, '(?-i)' enable case-sensitive mode
+      scope: instruction.type.pio
+      push: # Best attempt at decoding instructions, backoff if (side <side_set_value>) or ([<delay_value>]) is reached
+        - include: instruction-line-continuation
+        - match: '(?i){{conditions}}(?-i)'
+          scope: instruction.condition.pio variable.parameter.pio
+        - match: '(?i){{registers}}(?-i)'
+          scope: instruction.register.pio variable.parameter.pio
+        - match: '(?i){{keywords}}(?-i)'
+          scope: instruction.keyword.pio variable.parameter.pio
+        - match: '{{identifier}}' 
+          scope: variable.function.pio
+        - include: numbers
+
+        - match: '(?=\s*(side|\[))' # reached the end, pop back to 'instructions-common'
+          pop: true
+        - include: comments
+        - include: line-ending
+
+
+  # From RP2040 datasheet Section 3.3.5
+  labels:
+    - include: line-continuation
+    - match: '{{public}}\b'
+      scope: label.public
+    - match: '({{identifier}})(:)(?!:)'
+      scope: label
+      captures:
+        1: label.symbol.pio entity.name.function.pio
+        2: punctuation.separator.pio
+    - include: comments
+
+  # From RP2040 datasheet Section 3.3.1
+  directives:
+    - meta_scope: directive.pio
+    
+    # .program <name>
+    - match: 'program\b'
+      scope: directive.program.pio
+      push:
+        - include: line-continuation
+        - match: '\b{{identifier}}\b'
+          scope: directive.program.name.pio entity.name.program.pio
+        - include: comments
+        - include: line-ending
+
+    # .origin <offset>
+    - match: 'origin\b'
+      scope: directive.origin.pio
+      push:
+        - include: line-continuation
+        - include: numbers
+        - include: comments
+        - include: line-ending
+    
+    # .side_set <count> (opt) (pindirs)
+    - match: 'side_set\b'
+      scope: directive.side_set.pio
+      push:
+        - include: line-continuation
+        - include: numbers
+        - match: '\b(opt)\b'
+          scope: directive.side_set.optional.pio
+        - match: '\b(pindirs)\b'
+          scope: directive.side_set.pindirs.pio
+        - include: comments
+        - include: line-ending
+
+    # .wrap
+    - match: 'wrap\b'
+      scope: directive.warp.pio directive.warp.source.pio keyword.control.flow.pio
+
+    # .wrap_target
+    - match: 'wrap_target\b'
+      scope: directive.warp.pio directive.warp.target.pio keyword.control.flow.pio 
+
+    # .define ( PUBLIC ) <symbol> <value>
+    - match: 'define\b'
+      scope: directive.define.pio keyword.control.define.pio
+      push:
+        - include: line-continuation
+        - match: '{{public}}'
+          scope: directive.define.public.pio
+        - match: '({{identifier}})'
+          scope: directive.define.symbol.pio entity.name.constant.pio
+          push:
+            - include: line-continuation
+            - meta_content_scope: directive.define.value.pio
+            - include: values
+            - include: line-ending
+        - include: comments
+        - include: line-ending
+
+    # .word <value>
+    - match: 'word\b'
+      scope: directive.word.pio
+      push:
+        - include: line-continuation
+        - meta_content_scope: directive.word.value.pio
+        - include: values
+        - include: comments
+        - include: line-ending
+
+    - include: comments
+    - include: line-ending
+
+
+  line-continuation:
+    - match: '(\\)$\n'
+      captures:
+        1: punctuation.separator.continuation.pio
+    - match: \\(\s+?)$
+      captures:
+        1: invalid.illegal.space-after-continuation.pio
+
+  line-ending:
+    - match: $
+      pop: true
+
+  instruction-line-continuation: # adds commas as continuation punctuation
+    - include: line-continuation
+    - match: ','
+      scope: punctuation.separator.continuation.pio
+
+
+  # From RP2040 datasheet Section 3.3.4
+  comments:
+    # Comments begin with a '//' or ';' and finish at the end of the line
+    - match: '//|;'
+      scope: punctuation.definition.comment.pio
+      push:
+        - meta_scope: comment.line.pio
+        - include: line-ending
+
+    # Comment blocks begin with a '/*' and finish with a "*/"
+    - match: '/\*'
+      scope: punctuation.definition.comment.begin.pio
+      push:
+        - meta_scope: comment.block.pio
+        - match: '\*/'
+          scope: punctuation.definition.comment.end.pio
+          pop: true
+
+
+  # Taken from the C-SDK documentation: https://datasheets.raspberrypi.com/pico/raspberry-pi-pico-c-sdk.pdf
+  # Section 3.3.10
+  embedded-language:
+    - meta_scope: meta.embedded.block.pio
+    - include: line-continuation
+
+    - match: '(c-sdk)\s*({)'
+      captures:
+        1: embedded.block.type.pio
+        2: punctuation.embedded.block.body.begin.pio
+      embed: scope:source.c
+      embed_scope: meta.embedded.block.body.c
+      escape: '(%)(})'
+      escape_captures: 
+        1: punctuation.embedded.block.end.pio
+        2: punctuation.embedded.block.body.end.pio
+
+    - match: '(python)\s*({)'
+      captures:
+        1: embedded.block.type.pio
+        2: punctuation.embedded.block.body.begin.pio
+      embed: scope:source.python
+      embed_scope: meta.embedded.block.body.python
+      escape: '(%)(})'
+      escape_captures: 
+        1: punctuation.embedded.block.end.pio
+        2: punctuation.embedded.block.body.end.pio
+
+    - include: comments
+    - include: line-ending
+
+

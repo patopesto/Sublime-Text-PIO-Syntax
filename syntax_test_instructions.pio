@@ -1,0 +1,53 @@
+// SYNTAX TEST "Packages/PIO Syntax/pio.sublime-syntax"
+
+// ********** Instructions **********
+// simple instruction
+out x, 1
+// <- source.pio meta.instruction
+//^ instruction.type
+//  ^ instruction.register variable.parameter.pio
+//   ^ punctuation.separator.continuation.pio
+
+
+// instruction in upper case
+OUT y, 2
+// <- source.pio meta.instruction
+//^ instruction.type
+
+// instruction with side value
+jmp !x high_0     side 1
+// <- source.pio meta.instruction
+//                ^ instruction.side.keyword
+//                     ^ instruction.side.value
+
+// instruction with delay value
+jmp x-- 0x56      [2]
+// <- source.pio meta.instruction
+//                ^ punctuation.instruction.delay.begin
+//                 ^ instruction.delay.value
+//                  ^ punctuation.instruction.delay.end
+
+
+// instruction with side and delay value
+jmp !y high_0     side 1 [0x3]
+// <- source.pio meta.instruction
+//                ^ instruction.side.keyword
+//                     ^ instruction.side.value
+//                       ^ punctuation.instruction.delay.begin
+//                        ^ instruction.delay.value
+//                           ^ punctuation.instruction.delay.end
+
+mov pins, 1
+
+
+//********** Example program (from pico-examples/pio/hello_pio) **********
+loop:
+// <- source.pio label
+    pull
+    // <- source.pio meta.instruction
+    //^ instruction.type
+    out pins, 1
+    //  ^ instruction.keyword.pio
+
+    jmp loop
+    //  ^ variable.function

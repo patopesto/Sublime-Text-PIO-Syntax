@@ -1,0 +1,92 @@
+// SYNTAX TEST "Packages/PIO Syntax/pio.sublime-syntax"
+
+// ********** Comments **********
+// foo
+// ^ source.pio comment.line
+// <- punctuation.definition.comment
+
+; foo
+// ^ source.pio comment.line
+// <- punctuation.definition.comment
+
+/* foo */
+// ^ source.pio comment.block
+// <- punctuation.definition.comment.begin
+//     ^ punctuation.definition.comment.end
+
+
+// ********** Directives **********
+.program name_123
+// <- source.pio directive punctuation.definition.directive
+// ^ directive.program
+//       ^ directive.program.name
+
+.origin 0
+// <- source.pio directive punctuation.definition.directive
+// ^ directive.origin
+//      ^ constant.numeric.value
+
+.side_set 1
+// <- source.pio directive punctuation.definition.directive
+// ^ directive.side_set
+//        ^ constant.numeric.value
+
+.side_set 3 opt pindirs
+// <- source.pio directive punctuation.definition.directive
+// ^ directive.side_set
+//        ^ constant.numeric.value
+//          ^ directive.side_set.optional
+//              ^ directive.side_set.pindirs
+
+.side_set 2 pindirs
+//          ^ directive.side_set.pindirs
+
+.wrap_target
+// <- source.pio directive punctuation.definition.directive
+// ^ directive.warp.target
+
+.wrap
+// <- source.pio directive punctuation.definition.directive
+// ^ directive.warp
+
+.define TEST 123 
+// <- source.pio directive punctuation.definition.directive
+// ^ directive.define
+//      ^ directive.define.symbol
+//           ^ directive.define.value
+//           ^ constant.numeric.value
+
+.define PUBLIC ABC123 ABC
+// <- source.pio directive punctuation.definition.directive
+// ^ directive.define
+//      ^ directive.define.public
+//             ^ directive.define.symbol
+//                    ^ directive.define.value
+
+.word 0x567
+// <- source.pio directive punctuation.definition.directive
+// ^ directive.word
+//    ^ directive.word.value
+
+
+// ********** Labels **********
+label:
+// <- source.pio label
+// ^ label.symbol
+//   ^ punctuation.separator
+
+public label:
+// <- source.pio label
+// ^ label.public
+//      ^ label.symbol
+//          ^ punctuation.separator
+
+
+// ********** Expressions **********
+.define TEST 1+2
+// <- source.pio directive punctuation.definition.directive
+//           ^ directive.define.value
+//           ^ constant.numeric.value
+
+
+

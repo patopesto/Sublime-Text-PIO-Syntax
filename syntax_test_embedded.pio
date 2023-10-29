@@ -1,0 +1,35 @@
+// SYNTAX TEST "Packages/PIO Syntax/pio.sublime-syntax"
+
+% c-sdk {
+// <- source.pio meta.embedded.block.pio punctuation.embedded.block.begin.pio
+// ^ embedded.block.type.pio
+//      ^ punctuation.embedded.block.body.begin.pio
+//       ^ meta.embedded.block.body.c
+
+    #include "hardware/clocks.h"
+
+    static void test(uint32_t foo) {
+        uint bar = foo + 1;
+        return bar;
+    }
+    // <-  meta.block.c punctuation.section.block.end.c
+%}
+// <- source.pio meta.embedded.block.pio punctuation.embedded.block.end.pio
+; <- punctuation.embedded.block.body.end.pio
+
+
+
+% python {
+# ^ embedded.block.type.pio
+#        ^ punctuation.embedded.block.body.begin.pio
+#         ^ meta.embedded.block.body.python
+
+    import rp2
+
+    def test(foo):
+        bar = foo+1
+        return bar
+
+%}
+// <- source.pio meta.embedded.block.pio punctuation.embedded.block.end.pio
+; <- punctuation.embedded.block.body.end.pio
