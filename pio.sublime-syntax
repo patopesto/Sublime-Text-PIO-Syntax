@@ -35,9 +35,8 @@ variables:
   integer_suffix: '[lL]{1,2}[uU]?|[uU][lL]{0,2}'
 
   instructions: '(jmp|wait|in|out|push|pull|mov|irq|set|nop)'
-  conditions: '(!x|x--|!y|y--|x!=y|pin(?!s)|!osre)'
   registers: '(x|y)'
-  keywords: '(pins|pin|gpio|irq|isr|osr|null|pindirs|pc|exec|iffull|block|noblock|ifempty|status|set|nowait|wait|clear)'
+  keywords: '(!x|x--|!y|y--|x!=y|!osre|pindirs|pins|pin|gpio|irq|isr|osr|null|pc|exec|iffull|block|noblock|ifempty|status|set|nowait|wait|clear)'
   # all the keywords in instructions found in section 3.4 of the datasheet where added here for syntax highlighting,
   # this could eventually be refactored to decoded each instruction properly, we are currently only making a best attempt
 
@@ -133,8 +132,6 @@ contexts:
       scope: instruction.type.pio
       push: # Best attempt at decoding instructions, backoff if (side <side_set_value>) or ([<delay_value>]) is reached
         - include: instruction-line-continuation
-        - match: '(?i){{conditions}}(?-i)'
-          scope: instruction.condition.pio variable.parameter.pio
         - match: '(?i){{registers}}(?-i)'
           scope: instruction.register.pio variable.parameter.pio
         - match: '(?i){{keywords}}(?-i)'

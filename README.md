@@ -40,5 +40,5 @@ Sublime's docs about test files: [here](https://www.sublimetext.com/docs/syntax.
 - [RP2040 datasheet](https://datasheets.raspberrypi.com/rp2040/rp2040-datasheet.pdf)
 - [C SDK documentation as PDF](https://datasheets.raspberrypi.com/pico/raspberry-pi-pico-c-sdk.pdf)
 - [C SDK documentation on Web](https://www.raspberrypi.com/documentation/pico-sdk/)
-- [Sublime Syntax Defintions](https://www.sublimetext.com/docs/syntax.html#testing)
+- [Sublime Syntax Definitions](https://www.sublimetext.com/docs/syntax.html#testing)
 - [Sublime Syntax Scopes](https://www.sublimetext.com/docs/scope_naming.html#)

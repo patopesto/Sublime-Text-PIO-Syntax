@@ -39,6 +39,8 @@ jmp !y high_0     side 1 [0x3]
 
 mov pins, 1
 
+set pindirs, 1
+
 
 //********** Example program (from pico-examples/pio/hello_pio) **********
 loop:
