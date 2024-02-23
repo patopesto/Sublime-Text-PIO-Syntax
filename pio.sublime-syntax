@@ -4,6 +4,7 @@
 # PIO syntax based on the RPI Pico datasheet (latest): https://datasheets.raspberrypi.com/rp2040/rp2040-datasheet.pdf
 #   datasheet version used: 2.2 (released 14 Jun 2023)
 
+name: PIO
 file_extensions:
   - pio
 version: 2
