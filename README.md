@@ -1,17 +1,22 @@
 # RaspberryPi PIO Assembly syntax
 
-Sublime Text 3 syntax hightling package for the PIO Assembly language used in the RP2040 MCU (RPI Pico).  
+Sublime Text 4 syntax hightling package for the PIO Assembly language used in the RP2040 MCU (RPI Pico).  
 File extension: `.pio`  
-Also Handles the embedded languages found in `.pio` files: `C` or `python`
+Also handles the embedded languages found in `.pio` files: `C` or `python`
 
 ## Usage
 
-Once installed, the `PIO` syntax will be available in the list of file.
+Once installed, the `PIO` syntax will be available in the list of syntaxes.
 
 
 ## Installation
 
-This package is not in Package Control yet.  
+### Using Package Control
+
+If you have [Package Control](https://packagecontrol.io/installation) installed: `Command Palette` → `Install Package` → `PIO`
+
+### Manually
+
 Clone this repository in your local packages folder.  
 If you are unsure as to where your local packages directory is, please consult the [docs](https://docs.sublimetext.io/guide/getting-started/basic-concepts.html#the-data-directory).  
 
